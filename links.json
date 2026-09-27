@@ -1,9 +1,16 @@
 {
-  "name": "신기템",
-  "desc": "영상 속 신기한 제품 · 제품번호로 검색하세요",
-  "logo": "",
+  "name": "신박템",
+  "desc": "영상 속 신박한 제품 · 제품번호로 검색하세요",
+  "logo": "logo.png",
   "notice": "아래 링크로 구매시 쿠팡 파트너스 수수료를 받습니다.",
   "items": [
-    {"no": 1, "name": "드릴 철판 커터 (판금컷팅기)", "url": "", "img": "img/001.jpg", "video": "gadget01", "coupang_item": "25801659542"}
+    {
+      "no": 1,
+      "name": "드릴 철판 커터 (판금컷팅기)",
+      "url": "",
+      "img": "img/001.jpg",
+      "video": "gadget01",
+      "coupang_item": "25801659542"
+    }
   ]
 }
