@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>상품 링크</title>
+<style>
+:root{--bg:#8b5242;--card:#f7d9cd;--item:#ffffff;--ink:#1f1a17;--muted:#6f625c;--line:#e8cfc4;--band:#fff4d8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:var(--ink)}
+.wrap{max-width:480px;margin:0 auto;min-height:100vh;background:var(--card);padding-bottom:40px}
+.band{background:var(--band);overflow:hidden;white-space:nowrap;font-size:13px;font-weight:700;padding:9px 0;position:sticky;top:0;z-index:2}
+.band span{display:inline-block;padding-left:100%;animation:flow 16s linear infinite}
+@keyframes flow{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){.band span{animation:none;padding-left:16px}}
+.head{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px 14px}
+.logo{width:84px;height:84px;border-radius:50%;object-fit:cover;background:#fff;border:3px solid #fff}
+.logo.txt{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:var(--bg)}
+.name{font-weight:800;font-size:18px;margin:0}
+.desc{font-size:13px;color:var(--muted);margin:0;text-align:center}
+.search{margin:6px 16px 14px;position:relative}
+.search input{width:100%;padding:12px 14px 12px 38px;border:1px solid var(--line);border-radius:12px;font-size:15px;background:#fff}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+.list{display:flex;flex-direction:column;gap:10px;padding:0 16px}
+.item{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:12px;background:var(--item);border-radius:14px;padding:8px 14px 8px 8px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,.08);min-height:64px}
+.item img,.item .ph{width:56px;height:48px;object-fit:contain;border-radius:8px;background:#f3eee9}
+.item b{font-size:14px;font-weight:600;text-align:center}
+.item.off{opacity:.55}
+.item.off b::after{content:" · 링크 준비 중";font-weight:400;color:var(--muted);font-size:12px}
+.empty{text-align:center;color:var(--muted);padding:30px 16px}
+a.item:focus-visible{outline:3px solid var(--bg);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="band" id="band"><span id="notice">아래 링크로 구매시 쿠팡 파트너스 수수료를 받습니다.</span></div>
+  <div class="head">
+    <div id="logoBox"></div>
+    <p class="name" id="name"></p>
+    <p class="desc" id="desc"></p>
+  </div>
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="영상 속 제품번호나 이름을 입력해주세요." aria-label="제품 검색">
+  </div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+// 이 페이지는 같은 폴더의 links.json 을 읽어 그린다(새 영상 = links.json 맨 앞에 한 줄 추가).
+fetch("links.json?v=" + Date.now()).then(r => r.json()).then(d => {
+  document.title = d.name + " | 상품 링크";
+  document.getElementById("name").textContent = d.name;
+  document.getElementById("desc").textContent = d.desc || "";
+  if (d.notice) document.getElementById("notice").textContent = d.notice;
+  const lb = document.getElementById("logoBox");
+  if (d.logo) { const i = new Image(); i.src = d.logo; i.alt = d.name; i.className = "logo"; lb.appendChild(i); }
+  else { const t = document.createElement("div"); t.className = "logo txt"; t.textContent = d.name.slice(0, 2); lb.appendChild(t); }
+  const items = (d.items || []).slice().sort((a, b) => b.no - a.no);
+  const list = document.getElementById("list");
+  function draw(q) {
+    list.innerHTML = "";
+    const k = (q || "").trim().replace(/번$/, "");
+    const shown = items.filter(it => !k || String(it.no) === k || String(it.no).padStart(3, "0") === k || it.name.includes(k));
+    if (!shown.length) { list.innerHTML = '<p class="empty">' + (items.length ? "찾는 제품이 없어요." : "상품을 준비하고 있어요.") + "</p>"; return; }
+    for (const it of shown) {
+      const el = document.createElement(it.url ? "a" : "div");
+      el.className = "item" + (it.url ? "" : " off");
+      if (it.url) { el.href = it.url; el.target = "_blank"; el.rel = "noopener sponsored"; }
+      const im = it.img ? '<img loading="lazy" src="' + it.img + '" alt="">' : '<span class="ph"></span>';
+      el.innerHTML = im + "<b></b>";
+      el.querySelector("b").textContent = it.no + ". " + it.name;
+      list.appendChild(el);
+    }
+  }
+  draw("");
+  document.getElementById("q").addEventListener("input", e => draw(e.target.value));
+}).catch(() => { document.getElementById("list").innerHTML = '<p class="empty">목록을 불러오지 못했어요. 잠시 뒤 다시 열어주세요.</p>'; });
+</script>
+</body>
+</html>
